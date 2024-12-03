@@ -10,14 +10,6 @@
 !.yarn/releases
 !.yarn/versions
 
-# Static assets
-public/*.ico
-public/*.svg
-public/*.woff
-public/*.woff2
-src/app/*.ico
-src/app/fonts/*.woff
-
 # testing
 /coverage
 
