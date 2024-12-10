@@ -13,6 +13,7 @@
 		"@emotion/styled": "^11.13.5",
 		"@mui/base": "^5.0.0-beta.63",
 		"@mui/material": "^6.1.10",
+		"@supabase/ssr": "^0.5.2",
 		"@supabase/supabase-js": "^2.46.2",
 		"axios": "^1.7.9",
 		"next": "15.0.3",
