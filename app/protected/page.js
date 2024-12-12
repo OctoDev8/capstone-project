@@ -1,71 +1,59 @@
 "use client";
 import { redirect } from "next/navigation";
-import { useState, useEffect } from "react";
-import SearchBar from "@/components/SearchBar/SearchBar";
-import axios from "axios";
-import { Card } from "@mui/material";
-import { Typography } from "@mui/material";
 import Link from "next/link";
-import { checkAuthentication } from "./actions";
-
-const endpoint = process.env.OMDB_ENDPOINT;
+import MovieList from "@/components/MovieList/MovieList";
+import { createClient } from "@/supabase/Client";
+import { useEffect, useState } from "react";
+import { CircularProgress } from "@mui/material";
 
 export default function ProtectedPage() {
-	const [value, setValue] = useState("");
-	const [getMovie, setGetMovies] = useState(null);
+	const supabase = createClient();
+	const [loading, setLoading] = useState(true);
 
-	// Server-side authentication check
-	useEffect(() => {
-		const checkUser = async () => {
-			const user = await checkAuthentication();
-			if (!user) {
-				redirect("/login");
-			}
-		};
-		checkUser();
-	}, []);
-
-	const handleChange = (e) => {
-		setValue(e.target.value);
-	};
-
-	async function handleSubmit(e) {
-		e.preventDefault();
-		const url = `https://www.omdbapi.com/?t=${value}&apikey=7fb4cbbd`;
-
-		const { data } = await axios.get(url);
-		if (!data || data.Response === "False") {
-			return <p>No movies found, try a different movie!</p>;
+	async function checkLoggedIn() {
+		const { data, error } = await supabase.auth.getUser();
+		if (error === null || !data?.user) {
+			redirect("/");
+		} else {
+			setLoading(false);
 		}
-		setGetMovies(data);
+		console.log(data);
+	}
+
+	async function logOut() {
+		let { error } = await supabase.auth.signOut();
+		console.log(error);
+		if (!error) {
+			redirect("/");
+		}
 	}
 
 	useEffect(() => {
-		console.log("Updated movie data:", getMovie);
-	}, [getMovie]);
+		checkLoggedIn();
+	}, []);
+
+	if (loading) {
+		return (
+			<section className="flex justify-center items-center h-screen">
+				<CircularProgress />
+			</section>
+		);
+	}
 
 	return (
 		<>
-			<Link href="/">Go back home</Link>
-			<SearchBar
-				value={value}
-				handleChange={handleChange}
-				handleSubmit={handleSubmit}
-			/>
-			{getMovie ? (
-				<Card>
-					<Typography variant="h4">
-						{getMovie.Title} ({getMovie.Year})
-					</Typography>
-					<img src={getMovie.Poster} alt="Poster" style={{ width: "200px" }} />
-					<Typography>Director: {getMovie.Director}</Typography>
-					<Typography>Actors: {getMovie.Actors}</Typography>
-					<Typography>Plot: {getMovie.Plot}</Typography>
-					<Typography>IMDb Rating: {getMovie.imdbRating}</Typography>
-				</Card>
-			) : (
-				<Typography>No movie found, try a different search!</Typography>
-			)}
+			<header>
+				<Link href="/">Go back home</Link>
+				<button
+					onClick={logOut}
+					className="bg-amber-400 px-4 py-2 rounded-md m-4 w-fit"
+				>
+					Logout
+				</button>
+			</header>
+			<main>
+				<MovieList />
+			</main>
 		</>
 	);
 }
