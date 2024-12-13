@@ -6,6 +6,10 @@ import { createClient } from "@/supabase/Client";
 import { useEffect, useState } from "react";
 import { CircularProgress } from "@mui/material";
 
+export async function getServerSideProps() {
+	return { props: {} };
+}
+
 export default function ProtectedPage() {
 	const supabase = createClient();
 	const [loading, setLoading] = useState(true);
